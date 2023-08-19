@@ -1,0 +1,38 @@
+# https://pyrasis.com/jHLsAlwaysUpToDateDocker/Unit12/04
+# It is asset-sync-pro-dev.
+version: '3.7'
+    
+services:
+    w-sync-c-mysql-dev:
+        image : mysql:5.7
+        container_name: w-sync-c-mysql-dev
+        restart: always
+        
+        ports:
+            - 3307:3306 #host(local):container
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        command:
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - dev-mysql-data:/var/lib/mysql #볼륨 연결
+            
+    w-sync-c-backend-dev:
+        container_name: w-sync-c-backend-dev
+        build:
+            context: ..  
+            dockerfile: docker/Dockerfile
+        ports: 
+            - 8080:8080
+        depends_on :
+            - w-sync-c-mysql-dev
+        restart: always
+
+        environment:
+            MYSQL_HOST: w-sync-c-mysql-dev:3306 #server ip:port
+            MYSQL_NAME: w-sync-c-dev
+            SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+            SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+volumes:
+    dev-mysql-data:
